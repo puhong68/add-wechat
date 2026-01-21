@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>添加微信</title>
+
+  <style>
+    :root{
+      --wechat-id: "CallMe001c"; /* ⭐ 改成你的微信号 */
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      height:100vh;
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+      overflow:hidden;
+    }
+
+    /* 背景 GIF */
+    .bg{
+      position:fixed;
+      inset:0;
+      background:url("./tip.gif") center / cover no-repeat;
+      z-index:0;
+    }
+
+    /* 遮罩层，让文字清晰 */
+    .mask{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.45);
+      z-index:1;
+    }
+
+    .container{
+      position:relative;
+      z-index:2;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      color:#fff;
+      text-align:center;
+    }
+
+    .card{
+      max-width:520px;
+      width:100%;
+    }
+
+    h1{
+      font-size:22px;
+      margin-bottom:12px;
+    }
+
+    p{
+      font-size:14px;
+      line-height:1.6;
+      opacity:.9;
+    }
+
+    .btn{
+      margin-top:20px;
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:14px;
+      background:#f2c7a9;
+      color:#000;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    /* 弹窗 */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.6);
+      z-index:10;
+    }
+
+    .modal.show{
+      display:flex;
+    }
+
+    .popup{
+      background:#fff;
+      color:#000;
+      border-radius:16px;
+      padding:22px;
+      width:90%;
+      max-width:360px;
+      text-align:center;
+      position:relative;
+    }
+
+    .popup h2{
+      margin:0 0 14px;
+      font-size:16px;
+    }
+
+    .copy-btn{
+      width:100%;
+      padding:12px;
+      background:#19be6b;
+      color:#fff;
+      border:none;
+      border-radius:12px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .close{
+      position:absolute;
+      top:8px;
+      right:10px;
+      font-size:20px;
+      cursor:pointer;
+      color:#999;
+    }
+
+    .toast{
+      position:fixed;
+      bottom:30px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,.8);
+      color:#fff;
+      padding:10px 16px;
+      border-radius:20px;
+      font-size:13px;
+      display:none;
+      z-index:20;
+    }
+
+    .toast.show{
+      display:block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg"></div>
+  <div class="mask"></div>
+
+  <div class="container">
+    <div class="card">
+      <h1>微信号：<span id="wx1"></span></h1>
+      <p>
+        请打开微信 → 搜索微信号 → 添加好友<br>
+        或点击下方按钮一键复制
+      </p>
+
+      <button class="btn" id="openBtn">
+        点击复制微信号
+      </button>
+    </div>
+  </div>
+
+  <!-- 弹窗 -->
+  <div class="modal" id="modal">
+    <div class="popup">
+      <div class="close" id="closeBtn">×</div>
+      <h2>微信号：<span id="wx2"></span></h2>
+      <button class="copy-btn" id="copyBtn">点击复制</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">微信号已复制</div>
+
+  <script>
+    const wechatId = "single16"; // ⭐ 改成你的微信号
+
+    document.getElementById("wx1").innerText = wechatId;
+    document.getElementById("wx2").innerText = wechatId;
+
+    const modal = document.getElementById("modal");
+    const toast = document.getElementById("toast");
+
+    document.getElementById("openBtn").onclick = () => {
+      modal.classList.add("show");
+    };
+
+    document.getElementById("closeBtn").onclick = () => {
+      modal.classList.remove("show");
+    };
+
+    document.getElementById("copyBtn").onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(wechatId);
+      } catch {
+        const t = document.createElement("textarea");
+        t.value = wechatId;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand("copy");
+        t.remove();
+      }
+      modal.classList.remove("show");
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1500);
+    };
+  </script>
+
+</body>
+</html>
