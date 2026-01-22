@@ -2,101 +2,218 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>联系方式</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="referrer" content="no-referrer" />
+  <title>微信号复制</title>
+
+  <!-- 基础 SEO/卡片（对微信卡片解析帮助有限，但对浏览器分享有用） -->
+  <meta name="description" content="点击复制微信号并在微信中搜索添加" />
+  <meta property="og:title" content="微信号复制" />
+  <meta property="og:description" content="点击复制微信号并在微信中搜索添加" />
+  <!-- 你可以放一张同目录 share.png 作为分享图（可选） -->
+  <!-- <meta property="og:image" content="share.png" /> -->
+
   <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      height:100vh;
-      overflow:hidden;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+    :root{
+      --card-w: min(86vw, 420px);
+      --card-radius: 10px;
+      --btn-radius: 6px;
+      --shadow: 0 12px 30px rgba(0,0,0,.25);
+      --text: #1f2d3d;
+      --muted: rgba(255,255,255,.75);
     }
-    /* 背景 GIF：默认用 tip.gif */
-    .bg{
-      position:fixed; inset:0;
-      background:url("./tip.gif") center/cover no-repeat;
+
+    html, body { height: 100%; margin: 0; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; }
+    body { background: #000; }
+
+    /* 背景层：gif */
+    .bg {
+      position: fixed; inset: 0;
+      background: url("tip.gif") center center / cover no-repeat;
+      /* 如果你想用视频或别的图，把 tip.gif 换成你的文件名 */
+      filter: saturate(1.05);
     }
-    /* 遮罩：让文字清晰 */
-    .mask{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.45);
+    /* 轻遮罩，提升文字可读性 */
+    .dim {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
     }
-    .wrap{
-      position:relative;
-      height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:22px;
-      color:#fff;
-      text-align:center;
+
+    /* 顶部提示 */
+    .top {
+      position: fixed;
+      left: 0; right: 0;
+      top: env(safe-area-inset-top, 0);
+      padding: 18px 16px 0;
+      text-align: center;
+      color: #2bb673; /* 绿色字，接近你示例 */
+      font-weight: 700;
+      line-height: 1.5;
+      text-shadow: 0 2px 10px rgba(0,0,0,.35);
+      pointer-events: none;
     }
-    .card{
-      width:min(560px, 92vw);
+    .top .sub {
+      font-weight: 600;
+      color: #2bb673;
+      opacity: .95;
     }
-    h1{
-      margin:0 0 12px;
-      font-size:22px;
-      font-weight:700;
-      letter-spacing:.5px;
+
+    /* 弹窗卡片 */
+    .modal-wrap {
+      position: fixed; inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
     }
-    .desc{
-      margin:0 0 16px;
-      font-size:14px;
-      line-height:1.7;
-      opacity:.92;
+
+    .card {
+      width: var(--card-w);
+      background: rgba(255,255,255,.95);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow);
+      padding: 22px 18px 18px;
+      text-align: center;
+      border: 1px solid rgba(0,0,0,.06);
     }
-    /* 重点：让用户能长按选择复制 */
-    .idbox{
-      display:inline-block;
-      padding:12px 14px;
-      border-radius:14px;
-      background:rgba(255,255,255,.14);
-      border:1px solid rgba(255,255,255,.22);
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
-      user-select:text;
-      -webkit-user-select:text;
-      font-size:18px;
-      font-weight:800;
-      letter-spacing:.4px;
+
+    .label {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 14px;
     }
-    .hint{
-      margin-top:14px;
-      font-size:13px;
-      opacity:.9;
-      line-height:1.6;
+
+    .wxid {
+      display: inline-block;
+      font-size: 18px;
+      font-weight: 800;
+      color: #111;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(0,0,0,.05);
+      user-select: all;
+      word-break: break-all;
     }
-    .tip{
-      margin-top:10px;
-      font-size:12px;
-      opacity:.75;
+
+    .btn {
+      margin-top: 16px;
+      width: 62%;
+      min-width: 160px;
+      height: 42px;
+      border: 0;
+      border-radius: var(--btn-radius);
+      background: #22c55e; /* 绿色按钮 */
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(34,197,94,.28);
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(18px + env(safe-area-inset-bottom, 0));
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.72);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+    .toast.show { opacity: 1; }
+
+    /* 小屏优化 */
+    @media (max-width: 360px){
+      .btn{ width: 75%; }
+      .label, .wxid{ font-size: 16px; }
     }
   </style>
 </head>
+
 <body>
-  <div class="bg"></div>
-  <div class="mask"></div>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="dim" aria-hidden="true"></div>
 
-  <div class="wrap">
-    <div class="card">
-      <h1>联系方式</h1>
-      <p class="desc">
-        请长按下方 ID 选择并复制<br>
-        然后打开微信 → 搜索 → 粘贴添加
-      </p>
+  <div class="top" id="topText">
+    <div>微信号：<span id="wxText">CallMe001c</span></div>
+    <div class="sub">请打开微信搜索并添加好友</div>
+  </div>
 
-      <!-- ✅ 用户长按这里复制 -->
-      <div class="idbox">CallMe001c</div>
-
-      <div class="hint">
-        如果无法长按，请在浏览器中打开后复制
-      </div>
-      <div class="tip">
-        （提示：不同手机/版本操作略有差异）
-      </div>
+  <div class="modal-wrap">
+    <div class="card" role="dialog" aria-modal="true">
+      <div class="label">微信号：<span id="wxCard" class="wxid">CallMe001c</span></div>
+      <button class="btn" id="copyBtn" type="button">点击复制</button>
     </div>
   </div>
+
+  <div class="toast" id="toast">已复制到剪贴板</div>
+
+  <script>
+    // 读取 URL 参数：?w=CallMe001c&fbid=xxx（fbid 不用也没关系）
+    const params = new URLSearchParams(location.search);
+    const w = (params.get('w') || 'CallMe001c').trim();
+
+    // 更新页面显示
+    const wxText = document.getElementById('wxText');
+    const wxCard = document.getElementById('wxCard');
+    wxText.textContent = w;
+    wxCard.textContent = w;
+
+    // toast
+    const toast = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg){
+      toast.textContent = msg || '已复制到剪贴板';
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+    }
+
+    // 复制逻辑（兼容性优先）
+    async function copyText(text){
+      // 优先走 Clipboard API（HTTPS 生效：GitHub Pages 是 HTTPS）
+      try{
+        if (navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      }catch(e){ /* fallthrough */ }
+
+      // 兼容旧方案：隐藏 textarea + execCommand
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      }catch(e){
+        return false;
+      }
+    }
+
+    // 点击复制
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const ok = await copyText(w);
+      showToast(ok ? '已复制到剪贴板' : '复制失败，请手动长按复制');
+    });
+
+    // 点击微信号也可复制（提升体验）
+    wxCard.addEventListener('click', async () => {
+      const ok = await copyText(w);
+      showToast(ok ? '已复制到剪贴板' : '复制失败，请手动长按复制');
+    });
+  </script>
 </body>
 </html>
